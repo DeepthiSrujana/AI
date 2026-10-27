@@ -1,0 +1,140 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class FourQueensCustomSteps {
+
+    // Calculates the heuristic cost: only counts diagonal conflicts since rows/cols are unique
+    public static int getHCost(int[] board) {
+        int n = board.length;
+        int conflicts = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                // Diagonal conflict check
+                if (Math.abs(board[i] - board[j]) == Math.abs(i - j)) {
+                    conflicts++;
+                }
+            }
+        }
+        return conflicts;
+    }
+
+    // Generates neighbors by SWAPPING two queens' rows to find the best improvement
+    public static int[] getBestSwapNeighbor(int[] board) {
+        int n = board.length;
+        int currentCost = getHCost(board);
+        int[] bestNeighbor = board;
+        int bestCost = currentCost;
+
+        // Try swapping every unique pair of columns
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int[] neighbor = Arrays.copyOf(board, n);
+                
+                // Swap the values at column i and column j
+                int temp = neighbor[i];
+                neighbor[i] = neighbor[j];
+                neighbor[j] = temp;
+
+                int neighborCost = getHCost(neighbor);
+
+                // Prioritise strictly better states
+                if (neighborCost < bestCost) {
+                    bestCost = neighborCost;
+                    bestNeighbor = neighbor;
+                }
+            }
+        }
+        return bestNeighbor;
+    }
+
+    public static void solveCustomRoute() {
+        // Initial state set exactly to your request
+        int[] currentBoard = {3, 1, 2, 0}; 
+        int currentCost = getHCost(currentBoard);
+        int step = 0;
+
+        System.out.println("=========================================");
+        System.out.println("EXACT STEP-BY-STEP TRACE FOR 4-QUEENS");
+        System.out.println("=========================================");
+        System.out.println("Step " + step + " (Initial State): " + Arrays.toString(currentBoard) + " | Conflicts (h): " + currentCost);
+        printVisualBoard(currentBoard);
+
+        // Local Search Loop
+        while (currentCost > 0) {
+            int[] neighbor = getBestSwapNeighbor(currentBoard);
+            int neighborCost = getHCost(neighbor);
+
+            if (neighborCost < currentCost) {
+                step++;
+                currentBoard = neighbor;
+                currentCost = neighborCost;
+                
+                System.out.println("Step " + step + " (Swapped State): " + Arrays.toString(currentBoard) + " | Conflicts (h): " + currentCost);
+                printVisualBoard(currentBoard);
+            } else {
+                System.out.println("❌ Unable to find a better swap. Stopped.");
+                break;
+            }
+        }
+
+        if (currentCost == 0) {
+            System.out.println("🎉 SUCCESS! Perfect global solution discovered: " + Arrays.toString(currentBoard));
+        }
+    }
+
+    // Prints the board configuration as a visual text grid
+    public static void printVisualBoard(int[] board) {
+        int n = board.length;
+        for (int row = 0; row < n; row++) {
+            StringBuilder line = new StringBuilder("  ");
+            for (int col = 0; col < n; col++) {
+                if (board[col] == row) {
+                    line.append(" Q ");
+                } else {
+                    line.append(" . ");
+                }
+            }
+            System.out.println(line.toString());
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        solveCustomRoute();
+    }
+}
+
+
+
+
+
+
+
+
+OUTPUT:
+
+ 
+=========================================
+EXACT STEP-BY-STEP TRACE FOR 4-QUEENS
+=========================================
+Step 0 (Initial State): [3, 1, 2, 0] | Conflicts (h): 2
+   .  .  .  Q 
+   .  Q  .  . 
+   .  .  Q  . 
+   Q  .  .  . 
+
+Step 1 (Swapped State): [1, 3, 2, 0] | Conflicts (h): 1
+   .  .  .  Q 
+   Q  .  .  . 
+   .  .  Q  . 
+   .  Q  .  . 
+
+Step 2 (Swapped State): [1, 3, 0, 2] | Conflicts (h): 0
+   .  .  Q  . 
+   Q  .  .  . 
+   .  .  .  Q 
+   .  Q  .  . 
+
+? SUCCESS! Perfect global solution discovered: [1, 3, 0, 2]
+PS C:\Users\admin> 
